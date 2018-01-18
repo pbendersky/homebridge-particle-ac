@@ -1,0 +1,25 @@
+language: node_js
+
+node_js:
+  - "6"
+
+cache: yarn
+
+env:
+    - CXX=g++-4.9
+
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - g++-4.9
+            - libavahi-compat-libdnssd-dev
+
+script:
+    - yarn test
+
+after_success:
+    - yarn run coverage
+    - bash <(curl -s https://codecov.io/bash)
+

@@ -1,0 +1,52 @@
+{
+  "name": "homebridge-particle-ac",
+  "version": "0.0.1",
+  "description": "Particle AC plugin for homebridge: https://github.com/nfarina/homebridge",
+  "license": "MIT",
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge",
+    "particle",
+    "particle photon",
+    "particle electron"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/norman-thomas/homebridge-particle-io.git"
+  },
+  "bugs": {
+    "url": "https://github.com/norman-thomas/homebridge-particle-io/issues"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint src/ test/",
+    "jshint": "jshint src/",
+    "check": "npm run lint && npm run jshint",
+    "test": "nyc --reporter=html --reporter=text mocha test/",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "engines": {
+    "node": ">=7.5.0",
+    "homebridge": ">=0.4.36"
+  },
+  "dependencies": {
+    "particle-api-js" : "7.0.1",
+    "eventsource": "",
+    "request": "^2.65.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "coveralls": "^2.11.15",
+    "eslint": "^3.13.1",
+    "eslint-config-airbnb-base": "^11.0.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-mocha": "^4.8.0",
+    "hap-nodejs": "^0.4.21",
+    "jshint": "^2.9.4",
+    "mocha": "^3.2.0",
+    "nyc": "^10.0.0",
+    "should": "^11.1.2",
+    "sinon": "^1.17.7",
+    "sinon-chai": "^2.8.0"
+  }
+}
