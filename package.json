@@ -32,7 +32,8 @@
   "dependencies": {
     "particle-api-js" : "7.0.1",
     "eventsource": "",
-    "request": "^2.65.0"
+    "request": "^2.65.0",
+    "lodash": ""
   },
   "devDependencies": {
     "chai": "^3.5.0",
