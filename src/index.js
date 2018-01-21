@@ -178,42 +178,6 @@ ParticleAC.prototype.sendIR = function() {
     });
 }
 
-/*
-ParticleAC.prototype.getCurrentHumidity = function(callback) {
-  this.log("Getting current humidity");
-
-  this.particle.getVariable({ deviceId: this.particleDeviceID, name: 'currentHumid', auth: this.particleToken})
-    .then((data) => {
-      this.log(data.body.result);
-      callback(null, data.body.result);
-    }, (err) => {
-      this.log("error: %s", err);
-      callback(err);
-    });
-}
-
-ParticleAC.prototype.getTemperatureDisplayUnits = function(callback) {
-  this.log("Getting Temperature Display Units");
-  callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS);
-}
-
-ParticleAC.prototype.setTemperatureDisplayUnits = function(newValue, callback) {
-  this.log("Setting Temperature Display Units");
-  this.log(newValue);
-  callback();
-}
-
-ParticleAC.prototype.getTargetTemperature = function(callback) {
-  this.log("Get Target Temperature");
-  callback(null, 25);
-}
-
-ParticleAC.prototype.setTargetTemperature = function(newValue, callback) {
-  this.log("Set Target Temperature to " + newValue);
-  callback();
-}
-
-*/
 ParticleAC.prototype.getServices = function() {
   return [this.service];
 }
