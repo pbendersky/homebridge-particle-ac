@@ -121,7 +121,7 @@ ParticleAC.prototype.setSwingMode = function(newValue, callback) {
 	this.log("setSwingMode");
   callback();
   this.heaterCoolerState.swingMode = newValue;
-  this.throttledSend();
+  this.sendIR();
 }
 
 ParticleAC.prototype.getCoolingThresholdTemperature = function(callback) {
