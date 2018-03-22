@@ -1,8 +1,29 @@
-var request = require("request");
 var Service, Characteristic;
 var Particle = require("particle-api-js");
+var mqtt = require('mqtt');
 var _ = require('lodash');
 const HeaterCoolerState = require("./HeaterCoolerState.js");
+
+class MQTTPubProperty {
+  constructor(mqtt, prefix, propertyName, initialValue) {
+    this.mqtt = mqtt;
+    this.prefix = prefix;
+    this.propertyName = propertyName;
+    
+    this.setValue(initialValue);
+  }
+  
+  setValue(newValue) {
+    if (this.currentValue != newValue) {
+      this.currentValue = String(newValue);
+      this.mqtt.publish(this.prefix + "/" + this.propertyName, this.currentValue);
+    }
+  }
+  
+  getValue() {
+    return this.currentValue;
+  }
+}
 
 module.exports = (homebridge) => {
   Service = homebridge.hap.Service;
@@ -18,6 +39,18 @@ function ParticleAC(log, config) {
   this.particleToken = config["particleToken"];
   this.particleDeviceID = config["particleDeviceID"];
   
+  this.mqtt = mqtt.connect(config["mqttServer"]);
+  var thiz = this;
+  this.mqtt.on('connect', function() {
+    thiz.mqtt.subscribe('particle/currentTemp');
+    thiz.mqtt.subscribe('particle/currentHumid');
+  });
+  
+  this.mqtt.on('message', function(topic, message) {
+    thiz.log(topic);
+    thiz.log(message.toString());
+  });
+  
   this.heaterCoolerState = new HeaterCoolerState()
   
   this.particle = new Particle();
@@ -29,10 +62,11 @@ function ParticleAC(log, config) {
   
   this.throttledSend = _.debounce(this.sendIR, 2000, { 'trailing': true });
 
-  this.service
-    .getCharacteristic(Characteristic.Active)
-    .on('get', this.getActive.bind(this))
-    .on('set', this.setActive.bind(this));
+  this.bindCharacteristicToMQTT(Characteristic.Active, 'active', Characteristic.Active.INACTIVE);
+  // this.service
+  //   .getCharacteristic(Characteristic.Active)
+  //   .on('get', this.getActive.bind(this))
+  //   .on('set', this.setActive.bind(this));
   this.service
     .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
     .on('get', this.getCurrentHeaterCoolerState.bind(this));
@@ -47,10 +81,11 @@ function ParticleAC(log, config) {
     .getCharacteristic(Characteristic.SwingMode)
     .on('get', this.getSwingMode.bind(this))
     .on('set', this.setSwingMode.bind(this));
-  this.service
-    .getCharacteristic(Characteristic.CoolingThresholdTemperature)
-    .on('get', this.getCoolingThresholdTemperature.bind(this))
-    .on('set', this.setCoolingThresholdTemperature.bind(this));
+  this.bindCharacteristicToMQTT(Characteristic.CoolingThresholdTemperature, 'coolingThreshold', 25);
+  // this.service
+  //   .getCharacteristic(Characteristic.CoolingThresholdTemperature)
+  //   .on('get', this.getCoolingThresholdTemperature.bind(this))
+  //   .on('set', this.setCoolingThresholdTemperature.bind(this));
   this.service
     .getCharacteristic(Characteristic.HeatingThresholdTemperature)
     .on('get', this.getHeatingThresholdTemperature.bind(this))
@@ -64,6 +99,20 @@ function ParticleAC(log, config) {
     })
     .on('get', this.getRotationSpeed.bind(this))
     .on('set', this.setRotationSpeed.bind(this));
+}
+
+ParticleAC.prototype.bindCharacteristicToMQTT = function(characteristic, propertyName, initialValue) {
+  this.log("bindCharacteristicToMQTT");
+  var property = new MQTTPubProperty(this.mqtt, "particle", propertyName, initialValue);
+  return this.service
+    .getCharacteristic(characteristic)
+    .on('get', function(callback) {
+      callback(null, property.getValue());
+    })
+    .on('set', function(newValue, callback) {
+      property.setValue(newValue);
+      callback();
+    });
 }
 
 ParticleAC.prototype.getActive = function(callback) {
@@ -124,18 +173,18 @@ ParticleAC.prototype.setSwingMode = function(newValue, callback) {
   this.sendIR();
 }
 
-ParticleAC.prototype.getCoolingThresholdTemperature = function(callback) {
-	this.log("getCoolingThresholdTemperature");
-  callback(null, this.heaterCoolerState.targetTemperature);
-}
+// ParticleAC.prototype.getCoolingThresholdTemperature = function(callback) {
+//   this.log("getCoolingThresholdTemperature");
+//   callback(null, this.heaterCoolerState.targetTemperature);
+// }
 
-ParticleAC.prototype.setCoolingThresholdTemperature = function(newValue, callback) {
-	this.log("setCoolingThresholdTemperature");
-  this.heaterCoolerState.targetTemperature = newValue;
-  this.service.updateCharacteristic(Characteristic.HeatingThresholdTemperature, newValue);
-  callback();
-  this.throttledSend();
-}
+// ParticleAC.prototype.setCoolingThresholdTemperature = function(newValue, callback) {
+//   this.log("setCoolingThresholdTemperature");
+//   this.heaterCoolerState.targetTemperature = newValue;
+//   this.service.updateCharacteristic(Characteristic.HeatingThresholdTemperature, newValue);
+//   callback();
+//   this.throttledSend();
+// }
 
 ParticleAC.prototype.getHeatingThresholdTemperature = function(callback) {
 	this.log("getHeatingThresholdTemperature");

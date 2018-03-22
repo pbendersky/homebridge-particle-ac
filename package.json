@@ -30,10 +30,10 @@
     "homebridge": ">=0.4.36"
   },
   "dependencies": {
-    "particle-api-js" : "7.0.1",
+    "particle-api-js": "7.0.1",
     "eventsource": "",
-    "request": "^2.65.0",
-    "lodash": ""
+    "lodash": "",
+    "mqtt": "^2.16"
   },
   "devDependencies": {
     "chai": "^3.5.0",
